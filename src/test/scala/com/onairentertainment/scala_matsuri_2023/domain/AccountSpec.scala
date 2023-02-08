@@ -2,9 +2,11 @@ package com.onairentertainment.scala_matsuri_2023.domain
 
 import munit.ScalaCheckSuite
 import org.scalacheck.Prop.*
+import DomainGens.given
 class AccountSpec extends ScalaCheckSuite:
-  property("addition is commutative") {
-    forAll { (n1: Int, n2: Int) =>
-      n1 + n2 != n2 + n1
+  property("Any account is valid") {
+    forAll { (accountType: AccountType, address: Address, balance: Balance) =>
+      val result = Account.make(accountType, address, balance)
+      result.isRight :| s"result = $result"
     }
   }

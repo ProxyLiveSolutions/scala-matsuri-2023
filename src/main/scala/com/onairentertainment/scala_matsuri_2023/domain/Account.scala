@@ -1,27 +1,20 @@
 package com.onairentertainment.scala_matsuri_2023.domain
-
-import cats.Eq
-import cats.derived.*
-
-enum AccType derives Eq:
-  case Personal
-  case Business
-final case class Account private (accountType: AccType, billAddress: Address, balance: Balance)
+final case class Account private (accountType: AccountType, billAddress: Address, balance: Balance)
 
 object Account:
   import cats.syntax.eq.*
-  def make(accountType: AccType, billAddress: Address, balance: Balance): Either[ValidationError, Account] =
+  def make(accountType: AccountType, billAddress: Address, balance: Balance): Either[ValidationError, Account] =
     if (
       billAddress.country === Country.Westerlands &&
-      accountType === AccType.Personal
+      accountType === AccountType.Personal
     )
       Left(ValidationError.PersonalAccountsForbidden(billAddress.country))
     else if (
       billAddress.country === Country.Crownlands &&
-      accountType === AccType.Personal &&
+      accountType === AccountType.Personal &&
       Currency.isCrypto(balance.currency)
     )
-      Left(ValidationError.CryptoBusinessOnly(billAddress.country))
+      Left(ValidationError.CryptoBusinessOnly(accountType, billAddress.country))
     else if (
       billAddress.country === Country.Stormlands &&
       Currency.isCrypto(balance.currency)

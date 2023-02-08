@@ -8,4 +8,4 @@ enum ValidationError:
   case CryptoForbidden(country: Country)
 
   /** Crypto currencies are allowed only for business accounts */
-  case CryptoBusinessOnly(country: Country)
+  case CryptoBusinessOnly(accountType: AccountType, country: Country)
