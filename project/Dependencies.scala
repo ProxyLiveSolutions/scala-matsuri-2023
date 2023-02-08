@@ -4,22 +4,17 @@ import sbt.librarymanagement.ModuleID
 object Dependencies {
   private type Deps = Seq[ModuleID]
 
-  private object Cats {
-    private val effectVer = "3.3.6"
-    private val coreVer   = "2.7.0"
-    private val org       = "org.typelevel"
+  object Cats {
+    val version = "2.9.0"
+    val groupID = "org.typelevel"
 
-    val core   = org %% "cats-core"   % coreVer
-    val effect = org %% "cats-effect" % effectVer
+    val core    = groupID         %% "cats-core" % version
+    val kittens = "org.typelevel" %% "kittens"   % "3.0.0"
   }
 
-  private object FS2 {
-    val core = "co.fs2" %% "fs2-core" % "3.2.7"
+  object Tests {
+    val munitCheck = "org.scalameta" %% "munit-scalacheck" % "0.7.29"
   }
 
-  private object Zio {
-    val catsInterop = "dev.zio" %% "zio-interop-cats" % "3.3.0"
-  }
-
-  val all: Deps = Seq(Cats.core, Cats.effect, FS2.core, Zio.catsInterop)
+  def all: Deps = Seq(Cats.core, Cats.kittens, Tests.munitCheck % Test)
 }
