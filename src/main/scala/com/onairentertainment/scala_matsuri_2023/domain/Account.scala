@@ -1,5 +1,9 @@
 package com.onairentertainment.scala_matsuri_2023.domain
-final case class Account private (accountType: AccountType, billAddress: Address, balance: Balance)
+
+import cats.derived.*
+import cats.Eq
+
+final case class Account private (accountType: AccountType, billAddress: Address, balance: Balance) derives Eq
 
 object Account:
   import cats.syntax.eq.*

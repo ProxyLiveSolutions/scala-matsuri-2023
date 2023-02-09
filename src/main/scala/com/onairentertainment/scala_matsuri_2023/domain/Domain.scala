@@ -8,26 +8,26 @@ enum AccountType derives Eq:
   case Personal
   case Business
 
-final case class City(name: String)
+final case class City(name: String) derives Eq
 enum Country derives Show, Eq:
   case FreeCities
   case Crownlands
   case Stormlands
   case Westerlands
 
-final case class Address(country: Country, city: City)
+final case class Address(country: Country, city: City) derives Eq
 
-enum Coins:
+enum Coins derives Eq:
   case Gold
   case Silver
   case Bronze
 
-enum Crypto:
+enum Crypto derives Eq:
   case Bitcoin
   case Monero
   case Doge
 
-enum Currency:
+enum Currency derives Eq:
   case CoinCurr(fiat: Coins)
   case CryptoCurr(crypto: Crypto)
 
@@ -36,4 +36,4 @@ object Currency:
     case _: CoinCurr   => false
     case _: CryptoCurr => true
 
-final case class Balance(value: Long, currency: Currency)
+final case class Balance(value: Long, currency: Currency) derives Eq

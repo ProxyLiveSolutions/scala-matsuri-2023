@@ -1,6 +1,9 @@
 package com.onairentertainment.scala_matsuri_2023.domain
 
-enum ValidationError:
+import cats.derived.*
+import cats.Eq
+
+enum ValidationError derives Eq:
   /** Country does not allow personal accounts */
   case PersonalAccountsForbidden(country: Country)
 
