@@ -24,11 +24,16 @@ object Dependencies {
     val macros = groupID %% "monocle-macro" % version
   }
 
+  object Others {
+    val ducktape = "io.github.arainko" %% "ducktape" % "0.1.3"
+  }
+
   def all: Deps = Seq(
     Cats.core,
     Cats.kittens,
     Monocle.core,
     Monocle.macros,
+    Others.ducktape,
     Tests.munitCheck     % Test,
     Tests.scalaCheckCats % Test
   )

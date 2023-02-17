@@ -1,17 +1,31 @@
 package com.onairentertainment.scala_matsuri_2023.lens
 
-import monocle.Lens
+import cats.{Applicative, Functor}
+import monocle.*
 
-object LensLifting:
+object LensDSL:
   import cats.Monad
   import cats.syntax.functor.*
   import cats.syntax.flatMap.*
-
-  def lift[F[_]: Monad, A, B](lens: Lens[A, B]): Lens[F[A], F[B]] =
-    def get(fa: F[A]): F[B] = fa.map(lens.get)
-    def replace(fb: F[B])(fa: F[A]): F[A] = for
-      b <- fb
+  final case class BySetterStep[F[_], A, B](fa: F[A], setter: Setter[A, B]):
+    infix def byF(fb: F[B])(using Monad[F]): F[A] = for {
       a <- fa
-    yield lens.replace(b)(a)
+      b <- fb
+    } yield setter.replace(b)(a)
+    infix def by(b: B)(using Monad[F]): F[A] = for {
+      a <- fa
+    } yield setter.replace(b)(a)
 
-    Lens.apply[F[A], F[B]](get)(replace)
+  final case class ByOptionalStep[F[_], A, B](fa: F[A], repl: Optional[A, B]):
+    infix def byF(fb: F[B])(using Monad[F]): F[A] = for {
+      a <- fa
+      b <- fb
+    } yield repl.replace(b)(a)
+
+    infix def by(b: B)(using Monad[F]): F[A] = for {
+      a <- fa
+    } yield repl.replace(b)(a)
+
+  extension [F[_], A](fa: F[A])
+    infix def replace[B](setter: Setter[A, B]): BySetterStep[F, A, B]   = BySetterStep(fa, setter)
+    infix def replace[B](opti: Optional[A, B]): ByOptionalStep[F, A, B] = ByOptionalStep(fa, opti)
