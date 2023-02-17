@@ -7,6 +7,7 @@ import cats.syntax.either.*
 import com.onairentertainment.scala_matsuri_2023.domain.lens.DomainLens.*
 import com.onairentertainment.scala_matsuri_2023.lens.LensDSL.*
 import org.scalacheck.cats.instances.GenInstances.*
+import org.scalacheck.Gen
 
 class LensCompositionSpec extends ScalaCheckSuite:
   override val scalaCheckInitialSeed = "iJo-NQQYFdz8Ty2IwTz4ugiQyxvJrTxNdqRaVltzHrF="
@@ -32,13 +33,11 @@ class LensCompositionSpec extends ScalaCheckSuite:
   }
 
   property("Crypto is available only for business in Crownlands") {
-    forAll { (address: Address, balance: Balance, anyCrypto: Crypto) =>
-      val crownlands    = address.copy(country = Country.Crownlands)
-      val cryptoCurr    = Currency.CryptoCurr(anyCrypto)
-      val cryptoBalance = balance.copy(currency = cryptoCurr)
-      val result        = Account.make(AccountType.Personal, crownlands, cryptoBalance)
-
-      val error = Left(ValidationError.CryptoBusinessOnly(AccountType.Personal, Country.Crownlands))
+    val patchedAddressGen = addressGen replace AddressCountryLens by Country.Crownlands
+    val patchedBalanceGen = balanceGen replace BalanceCryptoOptional byF cryptoGen
+    forAll(patchedAddressGen, patchedBalanceGen) { (address, balance) =>
+      val result = Account.make(AccountType.Personal, address, balance)
+      val error  = Left(ValidationError.CryptoBusinessOnly(AccountType.Personal, address.country))
 
       (result === error) :| s"result = $result"
     }
