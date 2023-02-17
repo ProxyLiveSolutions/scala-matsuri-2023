@@ -10,8 +10,6 @@ import org.scalacheck.Prop.*
 import org.scalacheck.cats.instances.GenInstances.*
 
 class GivenDomainLensCompositionSpec extends ScalaCheckSuite:
-  override val scalaCheckInitialSeed = "iJo-NQQYFdz8Ty2IwTz4ugiQyxvJrTxNdqRaVltzHrF="
-
   property("Personal accs are forbidden in Westerlands") {
     val patchedAddressGen = addressGen by Country.Westerlands
 
