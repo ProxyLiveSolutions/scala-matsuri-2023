@@ -11,18 +11,15 @@ object Account:
     if (
       billAddress.country === Country.Westerlands &&
       accountType === AccountType.Personal
-    )
-      Left(ValidationError.PersonalAccountsForbidden(billAddress.country))
+    ) Left(ValidationError.PersonalAccountsForbidden(billAddress.country))
     else if (
       billAddress.country === Country.Crownlands &&
       accountType === AccountType.Personal &&
       Currency.isCrypto(balance.currency)
-    )
-      Left(ValidationError.CryptoBusinessOnly(accountType, billAddress.country))
+    ) Left(ValidationError.CryptoBusinessOnly(accountType, billAddress.country))
     else if (
       billAddress.country === Country.Stormlands &&
       Currency.isCrypto(balance.currency)
-    )
-      Left(ValidationError.CryptoForbidden(billAddress.country))
+    ) Left(ValidationError.CryptoForbidden(billAddress.country))
     else
       Right(Account(accountType, billAddress, balance))
