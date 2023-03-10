@@ -2,10 +2,14 @@
 
 ## Table of content:
 * Problem definition
-* Introduction
-  * What is ScalaCheck and its generators?
-  * What is Monocle?
-* Solution: Composable gens
+* Tech stack
+  * ScalaCheck and its generators
+  * Monocle
+* Composable Gens
+  * Manual composition
+  * Using Lens
+  * Implicit lens
+  * Auto derivation
 * Links
 
 
@@ -151,8 +155,46 @@ property("Crypto is forbidden in Stormlands") {
 }
 ```
 
-### Lens as a typeclass
+### Implicit lens 
+It is possible to reduce amount of code needed to patch a generator. We can define lens as implicits(givens in Scala 3) so the compiler can use a proper one automatically. It is possible as we have all the info about a needed optic at the moment of calling `by` and `byF`
+
+```scala
+// GivenLensDSL.scala
+/** DSL based on given Lens */
+object GivenLensDSL:
+  extension [F[_], A](fa: F[A])
+    infix def by[B](b: B)(using setter: Setter[A, B], m: Monad[F]): F[A] =
+      for a <- fa
+    yield setter.replace(b)(a)
+
+    infix def byF[B](fb: F[B])(using opti: Optional[A, B], m: Monad[F]): F[A] = for
+      a <- fa
+      b <- fb
+    yield opti.replace(b)(a)
+```
+We can use this DSL like this:
+
+```scala
+property("Crypto is forbidden in Stormlands") {
+  val patchedAddressGen = addressGen by Country.Stormlands
+  val patchedBalanceGen = balanceGen byF cryptoGen
+
+  forAll(accountTypeGen, patchedAddressGen, patchedBalanceGen) { (accountType, address, balance) =>
+    val result = Account.make(accountType, address, balance)
+    (result === Left(ValidationError.CryptoForbidden(Country.Stormlands))) :| s"result = $result"
+  }
+}
+```
+
 ### Auto derivation
+Further improvement can be archived by introducing lens auto derivation to the project.
+For Scala 2.13.x it is possible to do using the tofu library.
+For Scala 3 it would require writing macros for that as the library is not yet ported to the latest Scala's version.
+That would make unnecessary explicit definition of optics in `DomainLens` and `GivenDomainLens`.
+
+Auto derivation of lens might be difficult though. Or impossible in some cases without changes in the structure of case classes in use. As it would require that all fields in the case classes have unique types among themselves. But this is another topic to explore 😊 
 
 ## Links
- 
+* [ScalaCheck](https://scalacheck.org/)
+* [Monocle](https://www.optics.dev/Monocle/)
+* [Scala Tofu](https://docs.tofu.tf/)
