@@ -26,19 +26,20 @@ In Scala code these rules can be expressed like that:
 
 ```scala
 // Account.scala
+
 def make(accountType: AccountType, billAddress: Address, balance: Balance): Either[ValidationError, Account] =
   if (
     billAddress.country === Country.Westerlands &&
-            accountType === AccountType.Personal
+    accountType === AccountType.Personal
   ) Left(ValidationError.PersonalAccountsForbidden(billAddress.country))
   else if (
     billAddress.country === Country.Crownlands &&
-            accountType === AccountType.Personal &&
-            Currency.isCrypto(balance.currency)
+    accountType === AccountType.Personal &&
+    Currency.isCrypto(balance.currency)
   ) Left(ValidationError.CryptoBusinessOnly(accountType, billAddress.country))
   else if (
     billAddress.country === Country.Stormlands &&
-            Currency.isCrypto(balance.currency)
+    Currency.isCrypto(balance.currency)
   ) Left(ValidationError.CryptoForbidden(billAddress.country))
   else
     Right(Account(accountType, billAddress, balance))
@@ -61,6 +62,7 @@ Scala 3 is used for this project because it's the coolest and the latest version
 ScalaCheck is a library for property based testing and one of its main features is the `Gen[T]` abstraction. There are two main features of `Gen[T]` - it randomly generates a value of `T` and can be composed with other `Gen`-s in order to generate more complex values.  
 ```scala
 // DomainGens.scala
+
 val accountTypeGen: Gen[AccountType] = Gen.oneOf(AccountType.values.toSeq)
 val cityGen: Gen[City]               = Gen.alphaNumStr.map(City.apply)
 val countryGen: Gen[Country]         = Gen.oneOf(Country.values.toSeq)
@@ -81,6 +83,7 @@ Apart from those combinators above `Gen`s can be combined using _for-comprehensi
 Monocle is a collection of different optics and utilities to work with them. It is needed to simplify work with complex deeply nested case classes - for their modificaitons or getting a piece of information from them.
 ```scala
 // DomainLens.scala
+
 val AddressCountryLens: Lens[Address, Country]   = GenLens[Address](_.country)
 val AddressCityLens: Lens[Address, City]         = GenLens[Address](_.city)
 val BalanceCurrencyLens: Lens[Balance, Currency] = GenLens[Balance](_.currency)
@@ -115,6 +118,7 @@ Monocle should help us to deal with this problem. Instead of using `.copy(..)` d
 
 ```scala
 // DomainLens.scala
+
 object DomainLens:
   val AddressCountryLens: Lens[Address, Country]   = ???
   val AddressCityLens: Lens[Address, City]         = ???
@@ -125,6 +129,7 @@ object DomainLens:
 The next step would be to add a small DSL to help with using optics together with `Gen[..]`.
 ```scala
 // LensDSL.scala
+
 object LensDSL:
   // omitted...
   final case class BySetterStep[F[_], A, B](fa: F[A], setter: Setter[A, B]):
@@ -144,6 +149,8 @@ object LensDSL:
 The optics and the DSL makes possible to replace parts of generated values a bit easier.
 
 ```scala
+// LensCompositionSpec.scala
+
 property("Crypto is forbidden in Stormlands") {
   val patchedAddressGen = addressGen replace AddressCountryLens by Country.Stormlands
   val patchedBalanceGen = balanceGen replace BalanceCryptoOptional byF cryptoGen
@@ -160,6 +167,7 @@ It is possible to reduce amount of code needed to patch a generator. We can defi
 
 ```scala
 // GivenLensDSL.scala
+
 /** DSL based on given Lens */
 object GivenLensDSL:
   extension [F[_], A](fa: F[A])
@@ -175,6 +183,8 @@ object GivenLensDSL:
 We can use this DSL like this:
 
 ```scala
+// GivenDomainLensCompositionSpec.scala
+
 property("Crypto is forbidden in Stormlands") {
   val patchedAddressGen = addressGen by Country.Stormlands
   val patchedBalanceGen = balanceGen byF cryptoGen
