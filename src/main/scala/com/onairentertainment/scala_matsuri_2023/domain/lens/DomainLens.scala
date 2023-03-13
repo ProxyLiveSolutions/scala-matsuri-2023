@@ -15,4 +15,5 @@ object DomainLens:
     case _                      => None
   } { crypto => _ => Currency.CryptoCurr(crypto) }
 
-  val BalanceCryptoOptional: Optional[Balance, Crypto] = BalanceCurrencyLens.andThen(CurrencyCryptoOptional)
+  val BalanceCryptoOptional: Optional[Balance, Crypto] =
+    BalanceCurrencyLens.andThen(CurrencyCryptoOptional)

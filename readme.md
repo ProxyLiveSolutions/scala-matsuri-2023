@@ -15,9 +15,9 @@
 
 ## Problem definition
 First of all, let's start with a problem definition.
-Today our problem is next - Bank accounts to Westeros. It's the continent in the fiction world of Game of Thrones. So let's imagine that we want to make a mobile bank for that world.
+Today our problem is next - Bank accounts in Westeros. It's the continent in the fiction world of Game of Thrones. So let's imagine that we want to make a mobile bank for that world.
 Unfortunately there are already a lot of regulations there in this regard:
-* All personal bank accounts are forbidden in **Westerlands**. Both fiat and crypto.
+* Personal bank accounts are forbidden in **Westerlands**. Both fiat and crypto.
 * **Crownlands** allows using cryptocurrencies only for business and don't for personal use.
 * No cryptocurrencies are legal in **Stormlands**. 
 * And only **Free Cities** have no regulations for banks.
@@ -46,8 +46,8 @@ def make(accountType: AccountType, billAddress: Address, balance: Balance): Eith
 ```
 
 And now we see four separate corner cases there - one per each country. In real systems there would be much more of them.
-Having such corner cases can make it difficult to use property-based tests to check this logic. The problem here is that now we need four different implementations of `Gen[T]`.  
-??? Logical transition ???
+Having such corner cases can make it difficult to use property-based tests to check this logic. The problem here is that now we need four different `Gen[..]` implementations for test data.  
+
 
 
 ## Tech stack
@@ -110,7 +110,7 @@ property("Crypto is forbidden in Stormlands") {
   }
 }
 ```
-This is a good old how to do that. In this case we change particular fields that we are interested in for a particular case. And that can work okey for simple case classes.
+This is a good old way how to do that. In this case we change particular fields that we are interested in for a particular case. And that can work okey for simple case classes.
 Unfortunately for complex domain and deep nested structures that would require way too much of boilerplate code for manually define all `.copy(..)` for each case.
 
 ### Using Lens
