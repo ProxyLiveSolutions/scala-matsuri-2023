@@ -1,4 +1,4 @@
-# Composable generators for ScalaCheck
+# Gens & Lens: Making generators composable
 
 ## Table of content:
 * Problem definition
